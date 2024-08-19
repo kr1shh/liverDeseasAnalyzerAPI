@@ -33,7 +33,21 @@ class PredictLiver(APIView):
             else:
                 message = "You have liver disease."
                 
-            return Response({"status": "ok", "prediction": prediction, "message": message}, status=status.HTTP_200_OK)
+            # Additional condition for diabetes based on ALT levels
+            if serializer.validated_data['alamine_aminotransferase'] > 40:
+                additional_message = (
+                    "Elevated alamine aminotransferase (ALT) levels detected, which may suggest an increased risk of metabolic conditions like diabetes. "
+                    "High ALT levels can be associated with insulin resistance or fatty liver, which are often linked to diabetes."
+                )
+            else:
+                additional_message = "ALT levels are within the normal range, indicating no immediate signs of diabetes or related metabolic conditions."
+
+            return Response({
+                "status": "ok",
+                "prediction": prediction,
+                "message": message,
+                "additional_message": additional_message
+            }, status=status.HTTP_200_OK)
         
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
